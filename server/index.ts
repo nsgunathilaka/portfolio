@@ -1,11 +1,35 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Get the actual __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Point to the real public folder (not in dist/)
+const PUBLIC_DIR = path.resolve(__dirname, "../server/public");
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// ✅ Serve robots.txt explicitly (avoids React/Vite fallback)
+app.get("/robots.txt", (req: Request, res: Response) => {
+  res.sendFile(path.join(PUBLIC_DIR, "robots.txt"));
+});
+
+
+app.get("/sitemap.xml", (req: Request, res: Response) => {
+  res.sendFile(path.join(PUBLIC_DIR, "sitemap.xml"));
+});
+
+
+// ✅ Serve all static files (e.g., /public/test.txt)
+app.use(express.static(PUBLIC_DIR));
+
+// Middleware for logging and measuring API timing
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -24,11 +48,9 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
-
       log(logLine);
     }
   });
@@ -39,31 +61,30 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // Global error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
     res.status(status).json({ message });
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Serve frontend or use Vite based on environment
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    serveStatic(app); // React static build + fallback
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  server.listen(
+      {
+        port,
+        host: "0.0.0.0",
+        reusePort: true,
+      },
+      () => {
+        log(`serving on port ${port}`);
+      }
+  );
 })();
