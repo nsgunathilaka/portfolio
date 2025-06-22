@@ -5,17 +5,17 @@ import { Facebook, Github, Linkedin, Mail, Phone } from "lucide-react";
 const socialLinks = [
   {
     icon: Facebook,
-    href: "https://facebook.com/yourusername",
+    href: "https://facebook.com/nihal.shantha.14",
     label: "Facebook"
   },
   {
     icon: Github,
-    href: "https://github.com/yourusername",
+    href: "https://github.com/nsgunathilaka",
     label: "GitHub"
   },
   {
     icon: Linkedin,
-    href: "https://linkedin.com/in/yourusername",
+    href: "https://www.linkedin.com/in/nihal-gunathilaka-945912170/",
     label: "LinkedIn"
   }
 ];
@@ -23,13 +23,13 @@ const socialLinks = [
 const contactInfo = [
   {
     icon: Mail,
-    href: "mailto:your.email@example.com",
-    label: "your.email@example.com"
+    href: "mailto:nihalshantha470@gmail.com",
+    label: "nihalshantha470@gmail.com"
   },
   {
     icon: Phone,
-    href: "tel:+94123456789",
-    label: "+94 12 345 6789"
+    href: "tel:+943417118",
+    label: "+94 74 341 7118"
   }
 ];
 
@@ -93,8 +93,7 @@ export default function Footer() {
           viewport={{ once: true }}
           className="text-center text-sm text-muted-foreground pt-8 border-t border-primary/10"
         >
-          <p>© {new Date().getFullYear()} Your Name. All rights reserved.</p>
-          <p className="mt-1">Crafted with passion using React and Modern Web Technologies</p>
+          <p>© {new Date().getFullYear()} Nihal Gunathilaka. All rights reserved.</p>
         </motion.div>
       </div>
     </footer>
