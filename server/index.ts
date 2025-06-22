@@ -3,6 +3,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from "url";
+import { SitemapStream, streamToPromise } from 'sitemap';
+import { Readable } from 'stream';
 
 // Get the actual __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -21,10 +23,17 @@ app.get("/robots.txt", (req: Request, res: Response) => {
 });
 
 
-app.get("/sitemap.xml", (req: Request, res: Response) => {
-  res.sendFile(path.join(PUBLIC_DIR, "sitemap.xml"));
-});
+app.get('/sitemap.xml', async (req, res) => {
+  const links = [
+    { url: '/', changefreq: 'monthly', priority: 1.0 },
+  ];
 
+  const stream = new SitemapStream({ hostname: 'https://nihalshantha.xyz' });
+  res.header('Content-Type', 'application/xml');
+
+  const xml = await streamToPromise(Readable.from(links).pipe(stream));
+  res.send(xml.toString());
+});
 
 // ✅ Serve all static files (e.g., /public/test.txt)
 app.use(express.static(PUBLIC_DIR));
